@@ -16,7 +16,7 @@ module.exports = {
             })
     },
     notHisAnswer(req, res, next) {
-        answer.findById(req.params.id)
+        Answer.findById(req.params.id)
             .then(question => {
                 if (question.user == req.decoded.id) {
                     res.status(401).json({message: 'You are not allowed to access this answer!'})

@@ -9,6 +9,10 @@ const answerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
     },
+    question: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Question'
+    },
     upVote: [
         {
             type: mongoose.Schema.Types.ObjectId, 

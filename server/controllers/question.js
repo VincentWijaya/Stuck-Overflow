@@ -7,14 +7,10 @@ class Controller {
             .populate('user', '_id name email')
             .populate('upVote', '_id name email')
             .populate('downVote', '_id name email')
-            // .populate({
-            //     path: 'answer',
-            //     select: '_id content user',
-            //     populate: {
-            //         path: 'user',
-            //         select: '_id name email'
-            //     }
-            // })
+            .populate({
+                path: 'answer',
+                select: '_id content user upVote downVote'
+            })
             .then(questions => {
                 res.status(200).json(questions)
             })
@@ -101,14 +97,10 @@ class Controller {
             .populate('user', '_id name email')
             .populate('upVote', '_id name email')
             .populate('downVote', '_id name email')
-            // .populate({
-            //     path: 'answer',
-            //     select: '_id content user',
-            //     populate: {
-            //         path: 'user',
-            //         select: '_id name email'
-            //     }
-            // })
+            .populate({
+                path: 'answer',
+                select: '_id content user upVote downVote'
+            })
             .then(question => {
                 res.status(200).json(question)
             })

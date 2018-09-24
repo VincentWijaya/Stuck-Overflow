@@ -46,9 +46,9 @@ class Controller {
                             })
                         } else {
                             let obj = {
-                                id: user._id,
-                                name: user.name,
-                                email: user.email
+                                id: data._id,
+                                name: data.name,
+                                email: data.email
                             }
 
                             jwt.sign(obj, process.env.JWT_SECRET, (err ,token) => {

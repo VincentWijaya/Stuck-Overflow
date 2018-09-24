@@ -6,6 +6,7 @@ require('dotenv').config()
 
 const usersRouter = require('./routes/users');
 const questionRouter = require('./routes/question')
+const answerRouter = require('./routes/answer')
 
 const app = express();
 
@@ -24,6 +25,7 @@ db.once('open', function() {
 
 app.use('/users', usersRouter);
 app.use('/question', questionRouter)
+app.use('/answer', answerRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
