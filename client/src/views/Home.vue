@@ -22,13 +22,6 @@ import Sidebar from '../components/Sidebar'
 export default {
   components: {
     Sidebar
-  },
-  created () {
-    let token = localStorage.getItem('token') ? localStorage.getItem('token') : ''
-    console.log(token)
-    if (token) {
-      this.$store.dispatch('checkToken', token)
-    }
   }
 }
 </script>

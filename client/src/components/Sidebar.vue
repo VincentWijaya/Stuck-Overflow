@@ -6,8 +6,13 @@
 
       <div class="list-group-item" v-for="(question, index) in questions" :key="index">
         <router-link class="sidebar-title" :to="{ name: 'question-detail', params: {id: question._id} }">{{ question.title.substr(0, 16) }}......</router-link>
-        <button type="button" class="btn btn-sm btn-danger">Delete</button>&nbsp;
-        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editArticleModal">Edit</button>
+        <br>
+        <i class="far fa-thumbs-up"></i> {{ question.upVote.length }}
+        &nbsp;<i class="far fa-thumbs-down"></i> {{ question.downVote.length }}
+        <div class="float-right">
+          <button type="button" class="btn btn-sm btn-danger" v-if="question.isHim" @click="deleteQuestion(question._id)">Delete</button>&nbsp;
+          <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editArticleModal" v-if="question.isHim" @click="getQuestion(question._id)">Edit</button>
+        </div>
       </div>
       <div class="loader" v-if="!isLoad"></div>
 
@@ -45,7 +50,7 @@
 
           <!-- Modal footer -->
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">Ask</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="addQuestion">Ask</button>
             <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
           </div>
 
@@ -65,7 +70,7 @@
           </div>
 
           <!-- Modal body -->
-          <div class="modal-body">
+          <div class="modal-body" v-if="isLoadEdit">
 
             <div class="container">
               <form>
@@ -82,11 +87,11 @@
             </div>
 
           </div>
-          <!-- <div class="loader" v-if="!isLoadEdit"></div> -->
+          <div class="loader" v-if="!isLoadEdit"></div>
           <!-- Modal footer -->
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">Edit Article</button>
-            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="updateQuestion">Edit Article</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal" @click="isLoadEdit = false">Close</button>
           </div>
 
         </div>
@@ -108,7 +113,9 @@ export default {
       description: '',
       titleEdit: '',
       descriptionEdit: '',
-      isLoad: false
+      questionId: '',
+      isLoad: false,
+      isLoadEdit: false
     }
   },
   computed: {
@@ -123,23 +130,136 @@ export default {
     }
   },
   created () {
-    let self = this
-
     let token = localStorage.getItem('token') ? localStorage.getItem('token') : ''
 
-    axios({
-      method: 'get',
-      url: `${baseUrl}/question`
-    })
-      .then(response => {
-        self.$store.dispatch('setQuestion', response.data)
-        self.isLoad = true
-      })
-      .catch(err => {
-        console.log(err)
-      })
+    this.$store.dispatch('checkToken', token)
+
+    this.getAllQuestion()
 
     this.$store.dispatch('setToken', token)
+  },
+  watch: {
+    token () {
+      let self = this
+      let token = localStorage.getItem('token') ? localStorage.getItem('token') : ''
+
+      this.$store.dispatch('checkToken', token)
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question`
+      })
+        .then(response => {
+          self.getAllQuestion()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+  },
+  methods: {
+    getAllQuestion () {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question`
+      })
+        .then(response => {
+          response.data.forEach(question => {
+            if (question.user._id === self.user.id) {
+              question['isHim'] = true
+            } else {
+              question['isHim'] = false
+            }
+          })
+
+          self.$store.dispatch('setQuestion', response.data)
+          self.isLoad = true
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    deleteQuestion (id) {
+      let self = this
+
+      axios({
+        method: 'delete',
+        url: `${baseUrl}/question/${id}`,
+        headers: {
+          token: this.token
+        }
+      })
+        .then(() => {
+          self.getAllQuestion()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    addQuestion () {
+      let self = this
+
+      axios({
+        method: 'post',
+        url: `${baseUrl}/question`,
+        headers: {
+          token: this.token
+        },
+        data: {
+          title: this.title,
+          description: this.description
+        }
+      })
+        .then(response => {
+          self.getAllQuestion()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    getQuestion (id) {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question/${id}`
+      })
+        .then(response => {
+          self.titleEdit = response.data.title
+          self.descriptionEdit = response.data.description
+          self.questionId = response.data._id
+          self.isLoadEdit = true
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    updateQuestion () {
+      let self = this
+
+      this.isLoadEdit = false
+
+      axios({
+        method: 'put',
+        url: `${baseUrl}/question/${this.questionId}`,
+        headers: {
+          token: this.token
+        },
+        data: {
+          title: this.titleEdit,
+          description: this.descriptionEdit
+        }
+      })
+        .then(() => {
+          self.$store.dispatch('setEditStat')
+          self.$router.push({ path: `/${self.questionId}` })
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
   }
 }
 </script>
@@ -156,6 +276,7 @@ export default {
       width: 120px;
       height: 120px;
       animation: spin 2s linear infinite;
+      margin: 0 auto;
   }
 
   @keyframes spin {

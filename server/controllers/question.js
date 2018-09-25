@@ -4,6 +4,7 @@ class Controller {
 
     static getQuestion(req, res) {
         Question.find()
+            .sort({ createdAt: 'desc' })
             .populate('user', '_id name email')
             .populate('upVote', '_id name email')
             .populate('downVote', '_id name email')

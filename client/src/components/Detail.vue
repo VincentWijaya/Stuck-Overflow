@@ -6,16 +6,17 @@
         <p class="card-text">{{ article.description }}</p>
       </div>
       <div class="card-footer text-muted mb-5" v-if="isLoad">
-        Posted on {{ created }} by {{ article.user.name }} &nbsp; <button class="btn btn-sm btn-ligth"><i class="far fa-thumbs-up"></i></button> ({{ article.upVote.length }})
-        &nbsp; <button class="btn btn-sm btn-ligth"><i class="far fa-thumbs-down"></i></button> ({{ article.downVote.length }})
+        Posted on {{ created }} by {{ article.user.name }}
+        &nbsp; <button class="btn btn-sm btn-ligth" v-if="token && !hisQuestion" @click="upVote(article._id)"><i class="far fa-thumbs-up"></i></button> <i class="far fa-thumbs-up" v-else></i> ({{ article.upVote.length }})
+        &nbsp; <button class="btn btn-sm btn-ligth" v-if="token && !hisQuestion" @click="downVote(article._id)"><i class="far fa-thumbs-down"></i></button> <i class="far fa-thumbs-down" v-else></i> ({{ article.downVote.length }})
       </div>
 
       <div class="my-3" v-if="token && isLoad">
         <div class="form-group row">
-          <div class="col-lg-5">
-            <textarea class="form-control" rows="2" placeholder="Answer........." v-model="comment"></textarea>
+          <div class="col-lg">
+            <textarea class="form-control" rows="3" placeholder="Answer........." v-model="answer"></textarea>
             <br>
-            <button type="button" class="btn btn-primary" @click="addComment">Answer</button>
+            <button type="button" class="btn btn-primary" @click="postAnswer(article._id)">Answer</button>
           </div>
         </div>
       </div>
@@ -23,14 +24,14 @@
       <div class="card-footer text-muted mb-4" v-for="answer in article.answer" :key="answer._id" v-if="isLoad">
         <h6>{{ answer.user.name }}: </h6>
         <p>{{ answer.content }}</p>
-        <button type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash fa-sm"/></button>
+        <button type="button" class="btn btn-xs btn-ligth"><i class="fas fa-pencil-alt"></i></button>
         &nbsp;
-        <button class="btn btn-sm btn-ligth"><i class="far fa-thumbs-up"></i></button> ({{ answer.upVote.length }})
+        <button class="btn btn-sm btn-ligth" v-if="token"><i class="far fa-thumbs-up"></i></button> <i class="far fa-thumbs-up" v-else></i> ({{ answer.upVote.length }})
         &nbsp;
-        <button class="btn btn-sm btn-ligth"><i class="far fa-thumbs-down"></i></button> ({{ answer.upVote.length }})
+        <button class="btn btn-sm btn-ligth" v-if="token"><i class="far fa-thumbs-down"></i></button> <i class="far fa-thumbs-down" v-else></i> ({{ answer.upVote.length }})
       </div>
 
-      <div class="loader text-center" v-if="!isLoad"></div>
+      <div class="loader" v-if="!isLoad"></div>
 
     </div>
 </template>
@@ -46,48 +47,115 @@ export default {
     return {
       article: {},
       created: '',
-      isLoad: false
+      isLoad: false,
+      answer: '',
+      hisQuestion: false
     }
   },
   created () {
-    let self = this
-
-    axios({
-      method: 'get',
-      url: `${baseUrl}/question/${this.id}`
-    })
-      .then(response => {
-        self.article = response.data
-        self.created = new Date(response.data.createdAt).toLocaleDateString()
-        self.isLoad = true
-      })
-      .catch(err => {
-        console.log(err)
-      })
+    this.getArticle()
   },
   watch: {
     id: function () {
-      let self = this
-
-      axios({
-        method: 'get',
-        url: `${baseUrl}/article/${this.id}`
-      })
-        .then(response => {
-          self.article = response.data
-          self.created = new Date(response.data.createdAt).toLocaleDateString()
-          self.isLoad = true
-        })
-        .catch(err => {
-          console.log(err)
-        })
+      this.getArticle()
+    },
+    editStat () {
+      this.getArticle()
     }
   },
   computed: {
     token () {
       return this.$store.state.token
+    },
+    editStat () {
+      return this.$store.state.editStat
+    },
+    user () {
+      return this.$store.state.user
     }
-  }
+  },
+  methods: {
+    getArticle () {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question/${this.id}`
+      })
+        .then(response => {
+          self.$store.dispatch('getQuestion')
+
+          if (response.data.user._id === self.user.id) {
+            self.hisQuestion = true
+          } else {
+            self.hisQuestion = false
+          }
+
+          self.article = response.data
+          self.created = new Date(response.data.createdAt).toLocaleDateString()
+          self.isLoad = true
+
+          self.$store.dispatch('removeEditStat')
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    upVote (id) {
+      let self = this
+
+      axios({
+        method: 'patch',
+        url: `${baseUrl}/question/upvote/${id}`,
+        headers: {
+          token: this.token
+        }
+      })
+        .then(() => {
+          self.getArticle()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    downVote (id) {
+      let self = this
+
+      axios({
+        method: 'patch',
+        url: `${baseUrl}/question/downvote/${id}`,
+        headers: {
+          token: this.token
+        }
+      })
+        .then(() => {
+          self.getArticle()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+    // postAnswer (id) {
+    //   let self = this
+
+    //   axios({
+    //     method: 'get',
+    //     url: `${baseUrl}/answer/${id}`,
+    //     headers: {
+    //       token: this.token
+    //     },
+    //     data: {
+    //       content: this.answer
+    //     }
+    //   })
+    //     .then(() => {
+
+    //     })
+    //     .catch(err => {
+    //       console.log(err)
+    //     })
+    // }
+  }// method
 }
 </script>
 
@@ -103,6 +171,7 @@ export default {
       width: 120px;
       height: 120px;
       animation: spin 2s linear infinite;
+      margin: 0 auto;
   }
 
   @keyframes spin {

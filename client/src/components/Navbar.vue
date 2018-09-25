@@ -156,6 +156,9 @@ export default {
       })
         .then(response => {
           localStorage.setItem('token', response.data)
+          let token = localStorage.getItem('token')
+
+          self.$store.dispatch('checkToken', token)
           self.$store.dispatch('setToken', response.data)
         })
         .catch(err => {
@@ -178,6 +181,10 @@ export default {
       })
         .then(response => {
           localStorage.setItem('token', response.data)
+
+          let token = localStorage.getItem('token')
+
+          self.$store.dispatch('checkToken', token)
           self.$store.dispatch('setToken', response.data)
         })
         .catch(err => {
@@ -205,8 +212,28 @@ export default {
         })
     },
     logout () {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question`
+      })
+        .then(response => {
+          self.$store.dispatch('setQuestion', response.data)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+
+      this.emailLogin = ''
+      this.passwordLogin = ''
+      this.registerData.name = ''
+      this.registerData.email = ''
+      this.registerData.password = ''
+
       localStorage.removeItem('token')
       this.$store.dispatch('removeToken')
+      this.$store.dispatch('removeUser')
     }
   },
   computed: {

@@ -10,7 +10,8 @@ export default new Vuex.Store({
   state: {
     token: '',
     questions: [],
-    user: {}
+    user: {},
+    editStat: false
   },
   mutations: {
     setToken (state, token) {
@@ -24,6 +25,15 @@ export default new Vuex.Store({
     },
     setData (state, data) {
       state.user = data
+    },
+    removeUser (state) {
+      state.user = ''
+    },
+    setEditStat (state) {
+      state.editStat = true
+    },
+    removeEditStat (state) {
+      state.editStat = false
     }
   },
   actions: {
@@ -48,7 +58,38 @@ export default new Vuex.Store({
           context.commit('setData', response.data)
         })
         .catch(err => {
-          console.log(err.response)
+          console.log(err.response.data.error)
+        })
+    },
+    removeUser (context) {
+      context.commit('removeUser')
+    },
+    setEditStat (context) {
+      context.commit('setEditStat')
+    },
+    removeEditStat (context) {
+      context.commit('removeEditStat')
+    },
+    getQuestion (context) {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/question`
+      })
+        .then(response => {
+          response.data.forEach(question => {
+            if (question.user._id === self.state.user.id) {
+              question['isHim'] = true
+            } else {
+              question['isHim'] = false
+            }
+          })
+
+          self.commit('setQuestion', response.data)
+        })
+        .catch(err => {
+          console.log(err)
         })
     }
   }
