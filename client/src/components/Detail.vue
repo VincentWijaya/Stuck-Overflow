@@ -24,11 +24,11 @@
       <div class="card-footer text-muted mb-4" v-for="answer in article.answer" :key="answer._id" v-if="isLoad">
         <h6>{{ answer.user.name }}: </h6>
         <p>{{ answer.content }}</p>
-        <button type="button" class="btn btn-xs btn-ligth"><i class="fas fa-pencil-alt"></i></button>
+        <button type="button" class="btn btn-xs btn-ligth" v-if="token && answer.isHim"><i class="fas fa-pencil-alt"></i></button>
         &nbsp;
-        <button class="btn btn-sm btn-ligth" v-if="token"><i class="far fa-thumbs-up"></i></button> <i class="far fa-thumbs-up" v-else></i> ({{ answer.upVote.length }})
+        <button class="btn btn-sm btn-ligth" v-if="token && !answer.isHim"><i class="far fa-thumbs-up"></i></button> <i class="far fa-thumbs-up" v-else></i> ({{ answer.upVote.length }})
         &nbsp;
-        <button class="btn btn-sm btn-ligth" v-if="token"><i class="far fa-thumbs-down"></i></button> <i class="far fa-thumbs-down" v-else></i> ({{ answer.upVote.length }})
+        <button class="btn btn-sm btn-ligth" v-if="token && !answer.isHim"><i class="far fa-thumbs-down"></i></button> <i class="far fa-thumbs-down" v-else></i> ({{ answer.upVote.length }})
       </div>
 
       <div class="loader" v-if="!isLoad"></div>
@@ -91,6 +91,14 @@ export default {
             self.hisQuestion = false
           }
 
+          response.data.answer.forEach(data => {
+            if (data.user._id === self.user.id) {
+              data['isHim'] = true
+            } else {
+              data['isHim'] = false
+            }
+          })
+
           self.article = response.data
           self.created = new Date(response.data.createdAt).toLocaleDateString()
           self.isLoad = true
@@ -134,27 +142,28 @@ export default {
         .catch(err => {
           console.log(err)
         })
+    },
+    postAnswer (id) {
+      let self = this
+
+      axios({
+        method: 'get',
+        url: `${baseUrl}/answer/${id}`,
+        headers: {
+          token: this.token
+        },
+        data: {
+          content: this.answer
+        }
+      })
+        .then(() => {
+          self.getArticle()
+          self.$store.dispatch('getQuestion')
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
-    // postAnswer (id) {
-    //   let self = this
-
-    //   axios({
-    //     method: 'get',
-    //     url: `${baseUrl}/answer/${id}`,
-    //     headers: {
-    //       token: this.token
-    //     },
-    //     data: {
-    //       content: this.answer
-    //     }
-    //   })
-    //     .then(() => {
-
-    //     })
-    //     .catch(err => {
-    //       console.log(err)
-    //     })
-    // }
   }// method
 }
 </script>

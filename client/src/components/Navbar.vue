@@ -160,6 +160,7 @@ export default {
 
           self.$store.dispatch('checkToken', token)
           self.$store.dispatch('setToken', response.data)
+          self.$router.push({ path: '/' })
         })
         .catch(err => {
           console.log(err)
@@ -186,6 +187,7 @@ export default {
 
           self.$store.dispatch('checkToken', token)
           self.$store.dispatch('setToken', response.data)
+          self.$router.push({ path: '/' })
         })
         .catch(err => {
           console.log(err)
@@ -234,6 +236,7 @@ export default {
       localStorage.removeItem('token')
       this.$store.dispatch('removeToken')
       this.$store.dispatch('removeUser')
+      this.$router.push({ path: '/' })
     }
   },
   computed: {
