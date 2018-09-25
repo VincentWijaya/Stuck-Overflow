@@ -1,12 +1,18 @@
 <template>
-    <div class="container">
-      <div class="row">
+    <div class="home">
+        <div class="container">
+            <div class="row">
 
-        <div class="col-lg-3 mt-5">
-          <Sidebar/>
+                <div class="col-lg-3 mt-5">
+                    <Sidebar/>
+                </div>
+
+                <div class="col-md-8 mt-5">
+                    <router-view/>
+                </div>
+
+            </div>
         </div>
-
-      </div>
     </div>
 </template>
 
@@ -16,6 +22,13 @@ import Sidebar from '../components/Sidebar'
 export default {
   components: {
     Sidebar
+  },
+  created () {
+    let token = localStorage.getItem('token') ? localStorage.getItem('token') : ''
+    console.log(token)
+    if (token) {
+      this.$store.dispatch('checkToken', token)
+    }
   }
 }
 </script>

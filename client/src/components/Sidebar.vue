@@ -4,13 +4,12 @@
     <h1>List Questions</h1>
     <div class="list-group">
 
-      <div class="list-group-item">
-        <!-- <router-link class="sidebar-title">Lalalala</router-link> -->
-        <h1>asdsad</h1>
+      <div class="list-group-item" v-for="(question, index) in questions" :key="index">
+        <router-link class="sidebar-title" :to="{ name: 'question-detail', params: {id: question._id} }">{{ question.title.substr(0, 16) }}......</router-link>
         <button type="button" class="btn btn-sm btn-danger">Delete</button>&nbsp;
         <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editArticleModal">Edit</button>
       </div>
-      <!-- <div class="loader" v-if="!isLoad"></div> -->
+      <div class="loader" v-if="!isLoad"></div>
 
     </div>
 
@@ -99,20 +98,46 @@
 <script>
 import axios from 'axios'
 
+const baseUrl = 'http://localhost:3000'
+
 export default {
   name: 'sidebar',
   data () {
     return {
-
+      title: '',
+      description: '',
+      titleEdit: '',
+      descriptionEdit: '',
+      isLoad: false
     }
   },
   computed: {
     token () {
       return this.$store.state.token
+    },
+    questions () {
+      return this.$store.state.questions
+    },
+    user () {
+      return this.$store.state.user
     }
   },
   created () {
+    let self = this
+
     let token = localStorage.getItem('token') ? localStorage.getItem('token') : ''
+
+    axios({
+      method: 'get',
+      url: `${baseUrl}/question`
+    })
+      .then(response => {
+        self.$store.dispatch('setQuestion', response.data)
+        self.isLoad = true
+      })
+      .catch(err => {
+        console.log(err)
+      })
 
     this.$store.dispatch('setToken', token)
   }

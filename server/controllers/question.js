@@ -9,7 +9,11 @@ class Controller {
             .populate('downVote', '_id name email')
             .populate({
                 path: 'answer',
-                select: '_id content user upVote downVote'
+                select: '_id content user upVote downVote',
+                populate: {
+                    path: 'user',
+                    select: '_id name email'
+                }
             })
             .then(questions => {
                 res.status(200).json(questions)
@@ -99,7 +103,11 @@ class Controller {
             .populate('downVote', '_id name email')
             .populate({
                 path: 'answer',
-                select: '_id content user upVote downVote'
+                select: '_id content user upVote downVote',
+                populate: {
+                    path: 'user',
+                    select: '_id name email'
+                }
             })
             .then(question => {
                 res.status(200).json(question)
