@@ -2,8 +2,13 @@ const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const encrypt = require('../helpers/encrypt')
+const {register} = require('../helpers/sendMail')
 
 class Controller {
+
+    static sendEmailRegister() {
+
+    }
 
     static loginFb(req, res) {
         let url = `https://graph.facebook.com/me?fields=id,name,email&access_token=${req.body.token_fb}`
@@ -18,6 +23,8 @@ class Controller {
                         res.status(500).json({error: err})
                     } else {
                         if (data.length === 0) {
+                            register(response.data.email, response.data.name)
+                            
                             let newUser = new User({
                                 fb: true,
                                 name: response.data.name,
@@ -80,6 +87,7 @@ class Controller {
 
         User.create(newUser)
             .then(() => {
+                register(req.body.email, req.body.name)
                 res.status(201).json({message: 'User created!'})
             })
             .catch(err => {
