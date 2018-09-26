@@ -213,6 +213,8 @@ export default {
         }
       })
         .then(response => {
+          self.title = ''
+          self.description = ''
           self.getAllQuestion()
         })
         .catch(err => {

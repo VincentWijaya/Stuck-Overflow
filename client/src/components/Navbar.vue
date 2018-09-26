@@ -210,7 +210,7 @@ export default {
           alert('Register success! You will automatically log in!')
         })
         .catch(err => {
-          console.log(err)
+          alert(err.response)
         })
     },
     logout () {

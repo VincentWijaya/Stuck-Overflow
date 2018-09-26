@@ -1,5 +1,6 @@
 const Answer = require('../models/Answer')
 const Question = require('../models/Question')
+const {sendAnswer} = require('../helpers/sendMail')
 
 class Controller {
 
@@ -19,7 +20,12 @@ class Controller {
                             .populate('upVote', '_id name email')
                             .populate('downVote', '_id name email')
                             .then(data => {
-                                res.status(201).json(data)
+                                Question.findById(req.params.id)
+                                    .populate('user', '_id name email')
+                                    .then(question => {
+                                        sendAnswer(question.user.email, question.user.name, question._id, data.user.name)
+                                        res.status(201).json(data)
+                                    })
                             })
                     })
                     .catch(err => {
@@ -43,7 +49,12 @@ class Controller {
                     .populate('upVote', '_id name email')
                     .populate('downVote', '_id name email')
                     .then(answer => {
-                        res.status(200).json(answer)
+                        Question.findById(answer.question)
+                        .populate('user', '_id name email')
+                        .then(question => {
+                            sendAnswer(question.user.email, question.user.name, question._id, answer.user.name)
+                            res.status(201).json(answer)
+                        })
                     })
             })
             .catch(err => {
