@@ -2,7 +2,7 @@
     <div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
             <div class="container flex-grow-1">
-                <a class="navbar-brand" href="http://localhost:8080">Stuck Overflow</a>
+                <a class="navbar-brand" href="https://stuck-overflow.skinborderevent.ml">Stuck Overflow</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -125,7 +125,7 @@
 <script>
 import axios from 'axios'
 
-const baseUrl = 'http://localhost:3000'
+const baseUrl = 'https://api-stuck-overflow.skinborderevent.ml'
 
 export default {
   data () {
@@ -138,7 +138,7 @@ export default {
       emailLogin: '',
       passwordLogin: '',
       fbSignInParams: {
-        scope: 'email,user_likes',
+        scope: 'email',
         return_scopes: true
       }
     }
